@@ -16,12 +16,12 @@ import           Data.Maybe
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import           Data.Time.Clock
-import qualified Database.PostgreSQL.Simple as P
+import qualified Database.MySQL.Simple as S
 import           Snap
 import           Snap.Snaplet.Auth
-import           Snap.Snaplet.Auth.Backends.PostgresqlSimple
+import           Snap.Snaplet.Auth.Backends.MysqlSimple
 import           Snap.Snaplet.Heist
-import           Snap.Snaplet.PostgresqlSimple
+import           Snap.Snaplet.MysqlSimple
 import           Snap.Snaplet.Session
 import           Snap.Snaplet.Session.Backends.CookieSession
 import           Snap.Util.FileServe
@@ -32,14 +32,14 @@ import           Text.XmlHtml hiding (render)
 ------------------------------------------------------------------------------
 data App = App
     { _sess :: Snaplet SessionManager
-    , _db :: Snaplet Postgres
+    , _db :: Snaplet Mysql
     , _auth :: Snaplet (AuthManager App)
     }
 
 makeLenses ''App
 
-instance HasPostgres (Handler b App) where
-    getPostgresState = with db get
+instance HasMysql (Handler b App) where
+    getMysqlState = with db get
 
 ------------------------------------------------------------------------------
 -- | The application's routes.
@@ -65,8 +65,8 @@ app :: SnapletInit App App
 app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     s <- nestSnaplet "" sess $
          initCookieSessionManager "site_key.txt" "_cookie" Nothing
-    d <- nestSnaplet "db" db pgsInit
-    a <- nestSnaplet "auth" auth $ initPostgresAuth sess d
+    d <- nestSnaplet "db" db mysqlInit
+    a <- nestSnaplet "auth" auth $ initMysqlAuth sess d
     addRoutes routes
     return $ App s d a
 
