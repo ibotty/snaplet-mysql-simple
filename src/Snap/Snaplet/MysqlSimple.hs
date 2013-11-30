@@ -28,7 +28,7 @@ Next, call the mysqlInit from your application's initializer.
 >     d <- nestSnaplet "db" db mysqlInit
 >     return $ App ... d
 
-Now you can use any of the postgresql-simple wrapper functions defined in this
+Now you can use any of the mysql-simple wrapper functions defined in this
 module anywhere in your application handlers.  For instance:
 
 > postHandler :: Handler App App ()
@@ -48,9 +48,9 @@ With this code, our postHandler example no longer requires the 'with' function:
 >     posts <- query_ "select * from blog_post"
 >     ...
 
-The first time you run an application with the postgresql-simple snaplet,
+The first time you run an application with the mysql-simple snaplet,
 a configuration file @devel.cfg@ is created in the
-@snaplets/postgresql-simple@ directory underneath your project root.  It
+@snaplets/mysql-simple@ directory underneath your project root.  It
 specifies how to connect to your MySQL or MariaDB server and what user,
 password, and database to use.  Edit this file and modify the values
 appropriately and you'll be off and running.
@@ -84,7 +84,7 @@ module Snap.Snaplet.MysqlSimple (
   , formatMany
   , formatQuery
 
-  -- Re-exported from postgresql-simple
+  -- Re-exported from mysql-simple
   , M.Query
   , M.In(..)
   , M.Binary(..)
@@ -130,10 +130,10 @@ import           Paths_snaplet_mysql_simple
 infixr 5 ++
 
 ------------------------------------------------------------------------------
--- | The state for the postgresql-simple snaplet. To use it in your app
+-- | The state for the mysql-simple snaplet. To use it in your app
 -- include this in your application state and use pgsInit to initialize it.
 data Mysql = Mysql
-    { pgPool :: Pool M.Connection
+    { mysqlPool :: Pool M.Connection
     -- ^ Function for retrieving the connection pool
     }
 
@@ -141,9 +141,9 @@ data Mysql = Mysql
 ------------------------------------------------------------------------------
 -- | Instantiate this typeclass on 'Handler b YourAppState' so this snaplet
 -- can find the connection source.  If you need to have multiple instances of
--- the postgres snaplet in your application, then don't provide this instance
+-- the mysql snaplet in your application, then don't provide this instance
 -- and leverage the default instance by using \"@with dbLens@\" in front of calls
--- to snaplet-postgresql-simple functions.
+-- to snaplet-mysql-simple functions.
 class (MonadCatchIO m) => HasMysql m where
     getMysqlState :: m Mysql
 
@@ -301,7 +301,7 @@ withMysql :: (HasMysql m)
        => (M.Connection -> IO b) -> m b
 withMysql f = do
     s <- getMysqlState
-    let pool = pgPool s
+    let pool = mysqlPool s
     liftIO $ withResource pool f
 
 
