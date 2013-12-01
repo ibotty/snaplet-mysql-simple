@@ -92,14 +92,12 @@ module Snap.Snaplet.MysqlSimple (
   , M.FormatError(..)
   , M.QueryError(..)
   , M.ResultError(..)
-  , MB.MySQLError(..)
+  , MB.MySQLError()
   , QueryResults(..)
   , QueryParams(..)
 
   , M.defaultConnectInfo
   ) where
-
-import Debug.Trace
 
 import           Prelude hiding ((++))
 import           Control.Lens -- (ASetter(), camelCaseFields, makeLensesWith, set)
@@ -193,7 +191,7 @@ getConnectionInfo config = do
 
     connInfo <- foldl modRecord (return M.defaultConnectInfo) params
 
-    trace (show connInfo) $ return $ set connectSSL (Just sslOpts) $ set connectOptions connOpts connInfo
+    return $ set connectSSL (Just sslOpts) $ set connectOptions connOpts connInfo
   where params =
             [ ("host", set connectHost)
             , ("port", set connectPort . read)
