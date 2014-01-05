@@ -357,4 +357,3 @@ instance IAuthBackend MysqlAuthManager where
                 , " = ?"
                 ]
         authExecute pamConnPool q [userLogin]
-
