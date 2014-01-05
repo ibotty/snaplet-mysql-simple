@@ -78,7 +78,6 @@ initMysqlAuth sess db = makeSnaplet "mysql-auth" desc datadir $ do
     let tableDesc = defAuthTable { tblName = authTable }
     let manager = MysqlAuthManager tableDesc $
                                       mysqlPool $ db ^# snapletValue
-                                      -- ^ XXX
     liftIO $ createTableIfMissing manager
     rng <- liftIO mkRNG
     return $ AuthManager
