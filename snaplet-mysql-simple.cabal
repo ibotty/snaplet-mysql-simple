@@ -48,7 +48,7 @@ Library
     mysql                      >= 0.1     && < 0.2,
     resource-pool-catchio      >= 0.2     && < 0.3,
     snap                       >= 0.10    && < 0.14,
-    text                       >= 0.11.2  && < 0.12,
+    text                       >= 0.11.2  && < 1.1,
     transformers               >= 0.2     && < 0.4,
     unordered-containers       >= 0.2     && < 0.3
 
