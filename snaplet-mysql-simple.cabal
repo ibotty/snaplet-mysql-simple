@@ -41,14 +41,18 @@ Library
     containers                 >= 0.4     && < 0.6,
     configurator               >= 0.2     && < 0.3,
     errors                     >= 1.4     && < 1.5,
-    lens                       >= 3.0     && < 4.0,
+    lens                       >= 3.0     && < 4.2,
     MonadCatchIO-transformers  >= 0.3     && < 0.4,
     mtl                        >= 2       && < 3,
     mysql-simple               >= 0.2     && < 0.3,
     mysql                      >= 0.1     && < 0.2,
     resource-pool-catchio      >= 0.2     && < 0.3,
     snap                       >= 0.10    && < 0.14,
+<<<<<<< HEAD
     text                       >= 0.11.2  && < 1.1,
+=======
+    text                       >= 0.11.2  && < 1.2,
+>>>>>>> bump lens dependency
     transformers               >= 0.2     && < 0.4,
     unordered-containers       >= 0.2     && < 0.3
 
