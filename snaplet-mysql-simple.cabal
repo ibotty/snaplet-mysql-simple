@@ -15,6 +15,7 @@ homepage:       https://github.com/ibotty/snaplet-mysql-simple
 category:       Web, Snap
 
 extra-source-files:  LICENSE
+                   , Changelog.md
 
 data-files:
   resources/db/devel.cfg
@@ -48,11 +49,7 @@ Library
     mysql                      >= 0.1     && < 0.2,
     resource-pool-catchio      >= 0.2     && < 0.3,
     snap                       >= 0.10    && < 0.14,
-<<<<<<< HEAD
-    text                       >= 0.11.2  && < 1.1,
-=======
     text                       >= 0.11.2  && < 1.2,
->>>>>>> bump lens dependency
     transformers               >= 0.2     && < 0.4,
     unordered-containers       >= 0.2     && < 0.3
 
