@@ -80,7 +80,7 @@ module Snap.Snaplet.MysqlSimple (
   , executeMany
   , rollback
   , commit
-  , withTransaction
+  -- , withTransaction
   , formatMany
   , formatQuery
 
@@ -102,7 +102,7 @@ module Snap.Snaplet.MysqlSimple (
 import           Prelude hiding ((++))
 import           Control.Lens -- (ASetter(), camelCaseFields, makeLensesWith, set)
 import           Control.Monad.CatchIO (MonadCatchIO)
-import qualified Control.Monad.CatchIO as CIO
+-- import qualified Control.Monad.CatchIO as CIO
 import           Control.Monad.IO.Class
 import           Control.Monad.State
 import           Control.Monad.Trans.Reader
@@ -385,11 +385,12 @@ commit :: (HasMysql m, MonadCatchIO m) => m ()
 commit = withMysql M.commit
 
 
-withTransaction :: (HasMysql m, MonadCatchIO m) => m a -> m a
-withTransaction action = do
-    r <- action `CIO.onException` rollback
-    commit
-    return r
+-- -- This is utterly broken
+-- withTransaction :: (HasMysql m, MonadCatchIO m) => m a -> m a
+-- withTransaction action = do
+--     r <- action `CIO.onException` rollback
+--     commit
+--     return r
 
 
 formatMany :: (QueryParams q, HasMysql m, MonadCatchIO m)
