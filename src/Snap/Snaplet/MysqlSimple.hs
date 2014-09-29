@@ -175,12 +175,15 @@ instance (MonadCatchIO m) => HasMysql (ReaderT Mysql m) where
 ------------------------------------------------------------------------------
 -- | Orphan Lenses for ConnectInfo
 --   Not exported, only used for 'getConnectionInfo'.
-$(makeLensesWith (LensRules Just Just (const Nothing)
-                     (S.fromList [SimpleLenses, GenerateSignatures]))
-                 ''M.ConnectInfo)
-$(makeLensesWith (LensRules Just Just (const Nothing)
-                     (S.fromList [SimpleLenses, GenerateSignatures]))
-                 ''MB.SSLInfo)
+$(makeLensesFor
+      (map (\x -> (x,x))
+           [ "connectHost", "connectPort", "connectUser", "connectPassword"
+           , "connectDatabase", "connectOptions", "connectPath", "connectSSL"])
+      ''M.ConnectInfo)
+$(makeLensesFor
+      (map (\x -> (x,x))
+           ["sslKey", "sslCert", "sslCA", "sslCAPath", "sslCiphers"])
+      ''MB.SSLInfo)
 
 ------------------------------------------------------------------------------
 -- | Produce a connection info from a config
