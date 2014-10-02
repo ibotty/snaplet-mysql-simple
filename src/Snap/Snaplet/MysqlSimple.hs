@@ -132,7 +132,7 @@ infixr 5 ++
 
 ------------------------------------------------------------------------------
 -- | The state for the mysql-simple snaplet. To use it in your app
--- include this in your application state and use pgsInit to initialize it.
+-- include this in your application state and use mysqlInit to initialize it.
 data Mysql = Mysql
     { mysqlPool :: Pool M.Connection
     -- ^ Function for retrieving the connection pool
@@ -159,7 +159,7 @@ instance HasMysql (Handler b Mysql) where
 -- | A convenience instance to make it easier to use this snaplet in the
 -- Initializer monad like this:
 --
--- > d <- nestSnaplet "db" db pgsInit
+-- > d <- nestSnaplet "db" db mysqlInit
 -- > count <- liftIO $ runReaderT (execute "INSERT ..." params) d
 instance (MonadCatchIO m) => HasMysql (ReaderT (Snaplet Mysql) m) where
     getMysqlState = asks (^# snapletValue)
