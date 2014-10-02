@@ -98,25 +98,20 @@ initMysqlAuth sess db = makeSnaplet "mysql-auth" desc datadir $ do
 
 ------------------------------------------------------------------------------
 -- | Create the user table if it doesn't exist.
--- XXX: Check sql
 createTableIfMissing :: MysqlAuthManager -> IO ()
 createTableIfMissing MysqlAuthManager{..} = do
     withResource pamConnPool $ \conn -> do
-        res <- M.query_ conn $ Query $ T.encodeUtf8 $
-          "select relname from pg_class where relname='"
-          `T.append` schemaless (tblName pamTable) `T.append` "'"
-        when (null (res :: [Only T.Text])) $
-          M.execute_ conn (Query $ T.encodeUtf8 q) >> return ()
+        M.execute_ conn (Query $ T.encodeUtf8 q)
     return ()
   where
-    schemaless = T.reverse . T.takeWhile (/='.') . T.reverse
     q = T.concat
-          [ "CREATE TABLE \""
+          [ "CREATE TABLE IF NOT EXISTS "
           , tblName pamTable
-          , "\" ("
-          , T.intercalate "," (map (fDesc . ($pamTable) . (fst)) colDef)
+          , "("
+          , T.intercalate ", " (map (fDesc . ($pamTable) . (fst)) colDef)
           , ")"
           ]
+
 
 buildUid :: Int -> UserId
 buildUid = UserId . T.pack . show
@@ -173,7 +168,7 @@ instance QueryResults AuthUser where
         !_userResetRequestedAt = convert f18 b18
         !_userRoles            = []
         !_userMeta             = HM.empty
-    convertResults fs vs = convertError fs vs 18
+    convertResults fs vs = convertError fs vs 19
 
 
 querySingle :: (QueryParams q, QueryResults a)
@@ -223,22 +218,22 @@ defAuthTable
   =  AuthTable
   {  tblName             = "snap_auth_user"
   ,  colId               = ("uid", "SERIAL PRIMARY KEY")
-  ,  colLogin            = ("login", "VARCHAR UNIQUE NOT NULL")
-  ,  colEmail            = ("email", "VARCHAR")
-  ,  colPassword         = ("password", "VARCHAR")
+  ,  colLogin            = ("login", "VARCHAR(255) UNIQUE NOT NULL")
+  ,  colEmail            = ("email", "VARCHAR(255)")
+  ,  colPassword         = ("password", "VARCHAR(255)")
   ,  colActivatedAt      = ("activated_at", "TIMESTAMP")
   ,  colSuspendedAt      = ("suspended_at", "TIMESTAMP")
-  ,  colRememberToken    = ("remember_token", "VARCHAR")
+  ,  colRememberToken    = ("remember_token", "VARCHAR(255)")
   ,  colLoginCount       = ("login_count", "INTEGER NOT NULL")
   ,  colFailedLoginCount = ("failed_login_count", "INTEGER NOT NULL")
   ,  colLockedOutUntil   = ("locked_out_until", "TIMESTAMP")
   ,  colCurrentLoginAt   = ("current_login_at", "TIMESTAMP")
   ,  colLastLoginAt      = ("last_login_at", "TIMESTAMP")
-  ,  colCurrentLoginIp   = ("current_login_ip", "VARCHAR")
-  ,  colLastLoginIp      = ("last_login_ip", "VARCHAR")
+  ,  colCurrentLoginIp   = ("current_login_ip", "VARCHAR(255)")
+  ,  colLastLoginIp      = ("last_login_ip", "VARCHAR(255)")
   ,  colCreatedAt        = ("created_at", "TIMESTAMP")
   ,  colUpdatedAt        = ("updated_at", "TIMESTAMP")
-  ,  colResetToken       = ("reset_token", "VARCHAR")
+  ,  colResetToken       = ("reset_token", "VARCHAR(255)")
   ,  colResetRequestedAt = ("reset_requested_at", "TIMESTAMP")
   ,  rolesTable          = "user_roles"
   }
@@ -308,10 +303,8 @@ instance IAuthBackend MysqlAuthManager where
         let (qstr, params) = saveQuery pamTable u
         let q = Query $ T.encodeUtf8 qstr
         let action = withResource pamConnPool $ \conn -> do
-                _      <- M.execute conn q params
-                newUid <- M.insertID conn
-                return . Right $
-                    u{ userId = Just $ buildUid $ fromIntegral newUid}
+                res <- M.query conn q params
+                return $ Right $ fromMaybe u $ listToMaybe res
         E.catch action onFailure
 
 
