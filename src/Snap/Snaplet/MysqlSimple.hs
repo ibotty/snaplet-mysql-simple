@@ -101,6 +101,7 @@ module Snap.Snaplet.MysqlSimple (
 
 import           Prelude hiding ((++))
 import           Control.Lens -- (ASetter(), camelCaseFields, makeLensesWith, set)
+import           Control.Monad
 import           Control.Monad.CatchIO (MonadCatchIO)
 -- import qualified Control.Monad.CatchIO as CIO
 import           Control.Monad.IO.Class
@@ -115,7 +116,6 @@ import           Data.Int
 import           Data.Maybe
 import           Data.Monoid(Monoid(..))
 import           Data.Pool
-import qualified Data.Set as S
 import           Data.Text (Text)
 import qualified Database.MySQL.Simple as M
 import qualified Database.MySQL.Base as MB
