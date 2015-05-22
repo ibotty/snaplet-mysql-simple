@@ -38,6 +38,8 @@ module Snap.Snaplet.Auth.Backends.MysqlSimple
 import           Prelude
 import           Control.Error
 import qualified Control.Exception as E
+import           Control.Lens
+import           Control.Monad.IO.Class
 import qualified Data.Configurator as C
 import qualified Data.HashMap.Lazy as HM
 import qualified Data.Text as T
