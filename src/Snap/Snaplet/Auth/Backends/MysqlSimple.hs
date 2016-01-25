@@ -38,9 +38,9 @@ module Snap.Snaplet.Auth.Backends.MysqlSimple
 import           Prelude
 import           Control.Error
 import qualified Control.Exception as E
-import           Control.Lens
-import           Control.Monad
-import           Control.Monad.IO.Class
+import           Control.Lens ((^#))
+import           Control.Monad (liftM)
+import           Control.Monad.IO.Class (liftIO)
 import qualified Data.Configurator as C
 import qualified Data.HashMap.Lazy as HM
 import qualified Data.Text as T
