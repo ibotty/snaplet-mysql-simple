@@ -100,7 +100,7 @@ module Snap.Snaplet.MysqlSimple (
   ) where
 
 import           Prelude hiding ((++))
-import           Control.Lens -- (ASetter(), camelCaseFields, makeLensesWith, set)
+import           Control.Lens
 import           Control.Monad.CatchIO (MonadCatchIO)
 -- import qualified Control.Monad.CatchIO as CIO
 import           Control.Monad.IO.Class
