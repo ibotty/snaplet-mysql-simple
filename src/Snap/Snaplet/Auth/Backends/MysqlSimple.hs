@@ -221,7 +221,7 @@ defAuthTable
   =  AuthTable
   {  tblName             = "snap_auth_user"
   ,  colId               = ("uid", "SERIAL PRIMARY KEY")
-  ,  colLogin            = ("login", "TEXT UNIQUE NOT NULL")
+  ,  colLogin            = ("login", "VARCHAR(255) UNIQUE NOT NULL")
   ,  colEmail            = ("email", "TEXT")
   ,  colPassword         = ("password", "TEXT")
   ,  colActivatedAt      = ("activated_at", "TIMESTAMP")
