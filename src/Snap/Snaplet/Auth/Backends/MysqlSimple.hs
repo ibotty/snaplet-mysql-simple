@@ -221,22 +221,22 @@ defAuthTable
   =  AuthTable
   {  tblName             = "snap_auth_user"
   ,  colId               = ("uid", "SERIAL PRIMARY KEY")
-  ,  colLogin            = ("login", "VARCHAR(255) UNIQUE NOT NULL")
-  ,  colEmail            = ("email", "VARCHAR(255)")
-  ,  colPassword         = ("password", "VARCHAR(255)")
+  ,  colLogin            = ("login", "TEXT UNIQUE NOT NULL")
+  ,  colEmail            = ("email", "TEXT")
+  ,  colPassword         = ("password", "TEXT")
   ,  colActivatedAt      = ("activated_at", "TIMESTAMP")
   ,  colSuspendedAt      = ("suspended_at", "TIMESTAMP")
-  ,  colRememberToken    = ("remember_token", "VARCHAR(255)")
+  ,  colRememberToken    = ("remember_token", "TEXT")
   ,  colLoginCount       = ("login_count", "INTEGER NOT NULL")
   ,  colFailedLoginCount = ("failed_login_count", "INTEGER NOT NULL")
   ,  colLockedOutUntil   = ("locked_out_until", "TIMESTAMP")
   ,  colCurrentLoginAt   = ("current_login_at", "TIMESTAMP")
   ,  colLastLoginAt      = ("last_login_at", "TIMESTAMP")
-  ,  colCurrentLoginIp   = ("current_login_ip", "VARCHAR(255)")
-  ,  colLastLoginIp      = ("last_login_ip", "VARCHAR(255)")
+  ,  colCurrentLoginIp   = ("current_login_ip", "TEXT")
+  ,  colLastLoginIp      = ("last_login_ip", "TEXT")
   ,  colCreatedAt        = ("created_at", "TIMESTAMP")
   ,  colUpdatedAt        = ("updated_at", "TIMESTAMP")
-  ,  colResetToken       = ("reset_token", "VARCHAR(255)")
+  ,  colResetToken       = ("reset_token", "TEXT")
   ,  colResetRequestedAt = ("reset_requested_at", "TIMESTAMP")
   ,  rolesTable          = "user_roles"
   }
@@ -345,7 +345,7 @@ instance IAuthBackend MysqlAuthManager where
       where cols = map (fst . ($pamTable) . fst) colDef
 
     destroy MysqlAuthManager{..} AuthUser{..} = do
-        let q = Query $ T.encodeUtf8 $ T.concat
+        let q = Query $ T.encodeUtf8 $  T.concat
                 [ "delete from "
                 , tblName pamTable
                 , " where "
