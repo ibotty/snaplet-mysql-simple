@@ -101,11 +101,13 @@ module Snap.Snaplet.MysqlSimple (
 
 import           Prelude hiding ((++))
 import           Control.Lens
-import           Control.Monad.CatchIO (MonadCatchIO)
+-- import           Control.Monad.CatchIO (MonadCatchIO)
 -- import qualified Control.Monad.CatchIO as CIO
 import           Control.Monad.IO.Class
 import           Control.Monad.State
 import           Control.Monad.Trans.Reader
+import           Control.Monad.Trans.Control            (MonadBaseControl,
+                                                         liftBaseWith, restoreM)
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as B8
 import           Data.Char
@@ -145,7 +147,8 @@ data Mysql = Mysql
 -- the mysql snaplet in your application, then don't provide this instance
 -- and leverage the default instance by using \"@with dbLens@\" in front of calls
 -- to snaplet-mysql-simple functions.
-class (MonadCatchIO m) => HasMysql m where
+
+class (MonadIO m, MonadBaseControl IO m) => HasMysql m where
     getMysqlState :: m Mysql
 
 
@@ -161,14 +164,14 @@ instance HasMysql (Handler b Mysql) where
 --
 -- > d <- nestSnaplet "db" db mysqlInit
 -- > count <- liftIO $ runReaderT (execute "INSERT ..." params) d
-instance (MonadCatchIO m) => HasMysql (ReaderT (Snaplet Mysql) m) where
+instance {-# OVERLAPPING #-} (MonadIO m, MonadBaseControl IO m) => HasMysql (ReaderT (Snaplet Mysql) m) where
     getMysqlState = asks (^# snapletValue)
 
 
 ------------------------------------------------------------------------------
 -- | A convenience instance to make it easier to use functions written for
 -- this snaplet in non-snaplet contexts.
-instance (MonadCatchIO m) => HasMysql (ReaderT Mysql m) where
+instance {-# OVERLAPPING #-} (MonadIO m, MonadBaseControl IO m) => HasMysql (ReaderT Mysql m) where
     getMysqlState = ask
 
 
@@ -325,8 +328,7 @@ query_ q = withMysql (\c -> M.query_ c q)
 -- |
 fold :: (HasMysql m,
          QueryResults row,
-         QueryParams params,
-         MonadCatchIO m)
+         QueryParams params)
      => M.Query -> params -> b -> (b -> row -> IO b) -> m b
 fold template qs a f = withMysql (\c -> M.fold c template qs a f)
 
@@ -334,8 +336,7 @@ fold template qs a f = withMysql (\c -> M.fold c template qs a f)
 ------------------------------------------------------------------------------
 -- |
 fold_ :: (HasMysql m,
-          QueryResults row,
-          MonadCatchIO m)
+          QueryResults row)
       => M.Query -> b -> (b -> row -> IO b) -> m b
 fold_ template a f = withMysql (\c -> M.fold_ c template a f)
 
@@ -344,8 +345,7 @@ fold_ template a f = withMysql (\c -> M.fold_ c template a f)
 -- |
 forEach :: (HasMysql m,
             QueryResults r,
-            QueryParams q,
-            MonadCatchIO m)
+            QueryParams q)
         => M.Query -> q -> (r -> IO ()) -> m ()
 forEach template qs f = withMysql (\c -> M.forEach c template qs f)
 
@@ -353,38 +353,37 @@ forEach template qs f = withMysql (\c -> M.forEach c template qs f)
 ------------------------------------------------------------------------------
 -- |
 forEach_ :: (HasMysql m,
-             QueryResults r,
-             MonadCatchIO m)
+             QueryResults r)
          => M.Query -> (r -> IO ()) -> m ()
 forEach_ template f = withMysql (\c -> M.forEach_ c template f)
 
 
 ------------------------------------------------------------------------------
 -- |
-execute :: (HasMysql m, QueryParams q, MonadCatchIO m)
+execute :: (HasMysql m, QueryParams q)
         => M.Query -> q -> m Int64
 execute template qs = withMysql (\c -> M.execute c template qs)
 
 
 ------------------------------------------------------------------------------
 -- |
-execute_ :: (HasMysql m, MonadCatchIO m)
+execute_ :: (HasMysql m)
          => M.Query -> m Int64
 execute_ template = withMysql (\c -> M.execute_ c template)
 
 
 ------------------------------------------------------------------------------
 -- |
-executeMany :: (HasMysql m, QueryParams q, MonadCatchIO m)
+executeMany :: (HasMysql m, QueryParams q)
         => M.Query -> [q] -> m Int64
 executeMany template qs = withMysql (\c -> M.executeMany c template qs)
 
 
-rollback :: (HasMysql m, MonadCatchIO m) => m ()
+rollback :: (HasMysql m) => m ()
 rollback = withMysql M.rollback
 
 
-commit :: (HasMysql m, MonadCatchIO m) => m ()
+commit :: (HasMysql m) => m ()
 commit = withMysql M.commit
 
 
@@ -396,11 +395,11 @@ commit = withMysql M.commit
 --     return r
 
 
-formatMany :: (QueryParams q, HasMysql m, MonadCatchIO m)
+formatMany :: (QueryParams q, HasMysql m)
            => M.Query -> [q] -> m ByteString
 formatMany q qs = withMysql (\c -> M.formatMany c q qs)
 
 
-formatQuery :: (QueryParams q, HasMysql m, MonadCatchIO m)
+formatQuery :: (QueryParams q, HasMysql m)
             => M.Query -> q -> m ByteString
 formatQuery q qs = withMysql (\c -> M.formatQuery c q qs)
