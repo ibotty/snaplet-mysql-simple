@@ -268,6 +268,10 @@ colDef =
   , (colResetRequestedAt, render . userResetRequestedAt)
   ]
 
+colNames :: AuthTable -> T.Text
+colNames pam =
+  T.intercalate "," . map (\(f,_) -> fst (f pam)) $ colDef
+
 saveQuery :: AuthTable -> AuthUser -> (Text, [Action])
 saveQuery at u@AuthUser{..} = maybe insertQuery updateQuery userId
   where
@@ -310,39 +314,35 @@ instance IAuthBackend MysqlAuthManager where
                 return $ Right $ fromMaybe u $ listToMaybe res
         E.catch action onFailure
 
-
     lookupByUserId MysqlAuthManager{..} uid = do
         let q = Query $ T.encodeUtf8 $ T.concat
-                [ "select ", T.intercalate "," cols, " from "
+                [ "select ", colNames pamTable, " from "
                 , tblName pamTable
                 , " where "
                 , fst (colId pamTable)
-                , " = ?"
+                , " = ?;"
                 ]
         querySingle pamConnPool q [unUid uid]
-      where cols = map (fst . ($pamTable) . fst) colDef
 
     lookupByLogin MysqlAuthManager{..} login = do
         let q = Query $ T.encodeUtf8 $ T.concat
-                [ "select ", T.intercalate "," cols, " from "
+                [ "select ", colNames pamTable, " from "
                 , tblName pamTable
                 , " where "
                 , fst (colLogin pamTable)
-                , " = ?"
+                , " = ?;"
                 ]
         querySingle pamConnPool q [login]
-      where cols = map (fst . ($pamTable) . fst) colDef
 
     lookupByRememberToken MysqlAuthManager{..} token = do
         let q = Query $ T.encodeUtf8 $ T.concat
-                [ "select ", T.intercalate "," cols, " from "
+                [ "select ", colNames pamTable, " from "
                 , tblName pamTable
                 , " where "
                 , fst (colRememberToken pamTable)
-                , " = ?"
+                , " = ?;"
                 ]
         querySingle pamConnPool q [token]
-      where cols = map (fst . ($pamTable) . fst) colDef
 
     destroy MysqlAuthManager{..} AuthUser{..} = do
         let q = Query $ T.encodeUtf8 $  T.concat
@@ -350,6 +350,6 @@ instance IAuthBackend MysqlAuthManager where
                 , tblName pamTable
                 , " where "
                 , fst (colLogin pamTable)
-                , " = ?"
+                , " = ?;"
                 ]
         authExecute pamConnPool q [userLogin]
