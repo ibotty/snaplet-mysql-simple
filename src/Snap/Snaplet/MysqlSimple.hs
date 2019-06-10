@@ -67,6 +67,7 @@ module Snap.Snaplet.MysqlSimple (
   , mysqlInit
   , mysqlInit'
   , getConnectionInfo
+  , withMysql
 
   -- * Wrappers and re-exports
   , query
