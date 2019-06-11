@@ -222,8 +222,8 @@ defAuthTable
   {  tblName             = "snap_auth_user"
   ,  colId               = ("uid", "SERIAL PRIMARY KEY")
   ,  colLogin            = ("login", "VARCHAR(255) UNIQUE NOT NULL")
-  ,  colEmail            = ("email", "TEXT")
-  ,  colPassword         = ("password", "TEXT")
+  ,  colEmail            = ("email", "VARCHAR(255)")
+  ,  colPassword         = ("password", "VARCHAR(255)")
   ,  colActivatedAt      = ("activated_at", "TIMESTAMP")
   ,  colSuspendedAt      = ("suspended_at", "TIMESTAMP")
   ,  colRememberToken    = ("remember_token", "TEXT")
@@ -232,11 +232,11 @@ defAuthTable
   ,  colLockedOutUntil   = ("locked_out_until", "TIMESTAMP")
   ,  colCurrentLoginAt   = ("current_login_at", "TIMESTAMP")
   ,  colLastLoginAt      = ("last_login_at", "TIMESTAMP")
-  ,  colCurrentLoginIp   = ("current_login_ip", "TEXT")
-  ,  colLastLoginIp      = ("last_login_ip", "TEXT")
+  ,  colCurrentLoginIp   = ("current_login_ip", "VARCHAR(255)")
+  ,  colLastLoginIp      = ("last_login_ip", "VARCHAR(255)")
   ,  colCreatedAt        = ("created_at", "TIMESTAMP")
   ,  colUpdatedAt        = ("updated_at", "TIMESTAMP")
-  ,  colResetToken       = ("reset_token", "TEXT")
+  ,  colResetToken       = ("reset_token", "VARCHAR(255)")
   ,  colResetRequestedAt = ("reset_requested_at", "TIMESTAMP")
   ,  rolesTable          = "user_roles"
   }
