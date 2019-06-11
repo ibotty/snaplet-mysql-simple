@@ -79,8 +79,7 @@ initMysqlAuth sess db = makeSnaplet "mysql-auth" desc datadir $ do
     authSettings <- authSettingsFromConfig
     key <- liftIO $ getKey (asSiteKey authSettings)
     let tableDesc = defAuthTable { tblName = authTable }
-    let manager = MysqlAuthManager tableDesc $
-                                      mysqlPool $ db ^# snapletValue
+    let manager = MysqlAuthManager tableDesc $ mysqlPool $ db ^# snapletValue
     liftIO $ createTableIfMissing manager
     rng <- liftIO mkRNG
     return $ AuthManager
@@ -89,6 +88,7 @@ initMysqlAuth sess db = makeSnaplet "mysql-auth" desc datadir $ do
       , activeUser = Nothing
       , minPasswdLen = asMinPasswdLen authSettings
       , rememberCookieName = asRememberCookieName authSettings
+      , rememberCookieDomain = Nothing
       , rememberPeriod = asRememberPeriod authSettings
       , siteKey = key
       , lockout = asLockout authSettings
