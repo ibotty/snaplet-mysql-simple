@@ -230,7 +230,7 @@ defAuthTable
   ,  colRememberToken    = ("remember_token", "VARCHAR(255)")
   ,  colLoginCount       = ("login_count", "INTEGER NOT NULL")
   ,  colFailedLoginCount = ("failed_login_count", "INTEGER NOT NULL")
-  ,  colLockedOutUntil   = ("locked_out_until", "TIMESTAMP DEFAULT NULL")
+  ,  colLockedOutUntil   = ("locked_out_until", "TIMESTAMP NULL DEFAULT NULL")
   ,  colCurrentLoginAt   = ("current_login_at", "TIMESTAMP")
   ,  colLastLoginAt      = ("last_login_at", "TIMESTAMP")
   ,  colCurrentLoginIp   = ("current_login_ip", "VARCHAR(255)")
