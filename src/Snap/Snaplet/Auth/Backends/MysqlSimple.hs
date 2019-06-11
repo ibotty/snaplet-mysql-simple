@@ -171,7 +171,8 @@ instance QueryResults AuthUser where
         !_userResetRequestedAt = convert f18 b18
         !_userRoles            = []
         !_userMeta             = HM.empty
-    convertResults fs vs = convertError fs vs 18
+    convertResults fs vs = do
+      convertError fs vs 18
 
 
 querySingle :: (QueryParams q, QueryResults a)
@@ -229,7 +230,7 @@ defAuthTable
   ,  colRememberToken    = ("remember_token", "VARCHAR(255)")
   ,  colLoginCount       = ("login_count", "INTEGER NOT NULL")
   ,  colFailedLoginCount = ("failed_login_count", "INTEGER NOT NULL")
-  ,  colLockedOutUntil   = ("locked_out_until", "TIMESTAMP")
+  ,  colLockedOutUntil   = ("locked_out_until", "TIMESTAMP DEFAULT NULL")
   ,  colCurrentLoginAt   = ("current_login_at", "TIMESTAMP")
   ,  colLastLoginAt      = ("last_login_at", "TIMESTAMP")
   ,  colCurrentLoginIp   = ("current_login_ip", "VARCHAR(255)")
