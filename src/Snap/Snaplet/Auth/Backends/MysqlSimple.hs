@@ -226,7 +226,7 @@ defAuthTable
   ,  colPassword         = ("password", "VARCHAR(255)")
   ,  colActivatedAt      = ("activated_at", "TIMESTAMP")
   ,  colSuspendedAt      = ("suspended_at", "TIMESTAMP")
-  ,  colRememberToken    = ("remember_token", "TEXT")
+  ,  colRememberToken    = ("remember_token", "VARCHAR(255)")
   ,  colLoginCount       = ("login_count", "INTEGER NOT NULL")
   ,  colFailedLoginCount = ("failed_login_count", "INTEGER NOT NULL")
   ,  colLockedOutUntil   = ("locked_out_until", "TIMESTAMP")
