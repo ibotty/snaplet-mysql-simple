@@ -171,7 +171,7 @@ instance QueryResults AuthUser where
         !_userResetRequestedAt = convert f18 b18
         !_userRoles            = []
         !_userMeta             = HM.empty
-    convertResults fs vs = convertError fs vs 19
+    convertResults fs vs = convertError fs vs 18
 
 
 querySingle :: (QueryParams q, QueryResults a)
