@@ -311,8 +311,8 @@ instance IAuthBackend MysqlAuthManager where
         let (qstr, params) = saveQuery pamTable u
         let q = Query $ T.encodeUtf8 qstr
         let action = withResource pamConnPool $ \conn -> do
-                res <- M.query conn q params
-                return $ Right $ fromMaybe u $ listToMaybe res
+                res <- M.execute conn q params
+                return $ Right u
         E.catch action onFailure
 
     lookupByUserId MysqlAuthManager{..} uid = do
