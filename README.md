@@ -2,5 +2,5 @@
 
 This snaplet contains support for using the MariaDB and MySQL
 database with a Snap Framework application via the mysql-simple
-package. It also includes an untested authentication backend.
+package. It also includes a tested authentication backend.
 Heavily based on snaplet-postgresql-simple by Doug Beardsley.
