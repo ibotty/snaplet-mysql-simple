@@ -79,8 +79,7 @@ initMysqlAuth sess db = makeSnaplet "mysql-auth" desc datadir $ do
     authSettings <- authSettingsFromConfig
     key <- liftIO $ getKey (asSiteKey authSettings)
     let tableDesc = defAuthTable { tblName = authTable }
-    let manager = MysqlAuthManager tableDesc $
-                                      mysqlPool $ db ^# snapletValue
+    let manager = MysqlAuthManager tableDesc $ mysqlPool $ db ^# snapletValue
     liftIO $ createTableIfMissing manager
     rng <- liftIO mkRNG
     return $ AuthManager
@@ -89,6 +88,7 @@ initMysqlAuth sess db = makeSnaplet "mysql-auth" desc datadir $ do
       , activeUser = Nothing
       , minPasswdLen = asMinPasswdLen authSettings
       , rememberCookieName = asRememberCookieName authSettings
+      , rememberCookieDomain = Nothing
       , rememberPeriod = asRememberPeriod authSettings
       , siteKey = key
       , lockout = asLockout authSettings
@@ -171,7 +171,8 @@ instance QueryResults AuthUser where
         !_userResetRequestedAt = convert f18 b18
         !_userRoles            = []
         !_userMeta             = HM.empty
-    convertResults fs vs = convertError fs vs 19
+    convertResults fs vs = do
+      convertError fs vs 18
 
 
 querySingle :: (QueryParams q, QueryResults a)
@@ -221,7 +222,7 @@ defAuthTable
   =  AuthTable
   {  tblName             = "snap_auth_user"
   ,  colId               = ("uid", "SERIAL PRIMARY KEY")
-  ,  colLogin            = ("login", "VARCHAR(255) UNIQUE NOT NULL")
+  ,  colLogin            = ("login", "VARCHAR(64) UNIQUE NOT NULL")
   ,  colEmail            = ("email", "VARCHAR(255)")
   ,  colPassword         = ("password", "VARCHAR(255)")
   ,  colActivatedAt      = ("activated_at", "TIMESTAMP")
@@ -229,7 +230,7 @@ defAuthTable
   ,  colRememberToken    = ("remember_token", "VARCHAR(255)")
   ,  colLoginCount       = ("login_count", "INTEGER NOT NULL")
   ,  colFailedLoginCount = ("failed_login_count", "INTEGER NOT NULL")
-  ,  colLockedOutUntil   = ("locked_out_until", "TIMESTAMP")
+  ,  colLockedOutUntil   = ("locked_out_until", "TIMESTAMP NULL DEFAULT NULL")
   ,  colCurrentLoginAt   = ("current_login_at", "TIMESTAMP")
   ,  colLastLoginAt      = ("last_login_at", "TIMESTAMP")
   ,  colCurrentLoginIp   = ("current_login_ip", "VARCHAR(255)")
@@ -267,6 +268,10 @@ colDef =
   , (colResetToken      , render . userResetToken)
   , (colResetRequestedAt, render . userResetRequestedAt)
   ]
+
+colNames :: AuthTable -> T.Text
+colNames pam =
+  T.intercalate "," . map (\(f,_) -> fst (f pam)) $ colDef
 
 saveQuery :: AuthTable -> AuthUser -> (Text, [Action])
 saveQuery at u@AuthUser{..} = maybe insertQuery updateQuery userId
@@ -306,50 +311,46 @@ instance IAuthBackend MysqlAuthManager where
         let (qstr, params) = saveQuery pamTable u
         let q = Query $ T.encodeUtf8 qstr
         let action = withResource pamConnPool $ \conn -> do
-                res <- M.query conn q params
-                return $ Right $ fromMaybe u $ listToMaybe res
+                res <- M.execute conn q params
+                return $ Right u
         E.catch action onFailure
-
 
     lookupByUserId MysqlAuthManager{..} uid = do
         let q = Query $ T.encodeUtf8 $ T.concat
-                [ "select ", T.intercalate "," cols, " from "
+                [ "select ", colNames pamTable, " from "
                 , tblName pamTable
                 , " where "
                 , fst (colId pamTable)
-                , " = ?"
+                , " = ?;"
                 ]
         querySingle pamConnPool q [unUid uid]
-      where cols = map (fst . ($pamTable) . fst) colDef
 
     lookupByLogin MysqlAuthManager{..} login = do
         let q = Query $ T.encodeUtf8 $ T.concat
-                [ "select ", T.intercalate "," cols, " from "
+                [ "select ", colNames pamTable, " from "
                 , tblName pamTable
                 , " where "
                 , fst (colLogin pamTable)
-                , " = ?"
+                , " = ?;"
                 ]
         querySingle pamConnPool q [login]
-      where cols = map (fst . ($pamTable) . fst) colDef
 
     lookupByRememberToken MysqlAuthManager{..} token = do
         let q = Query $ T.encodeUtf8 $ T.concat
-                [ "select ", T.intercalate "," cols, " from "
+                [ "select ", colNames pamTable, " from "
                 , tblName pamTable
                 , " where "
                 , fst (colRememberToken pamTable)
-                , " = ?"
+                , " = ?;"
                 ]
         querySingle pamConnPool q [token]
-      where cols = map (fst . ($pamTable) . fst) colDef
 
     destroy MysqlAuthManager{..} AuthUser{..} = do
-        let q = Query $ T.encodeUtf8 $ T.concat
+        let q = Query $ T.encodeUtf8 $  T.concat
                 [ "delete from "
                 , tblName pamTable
                 , " where "
                 , fst (colLogin pamTable)
-                , " = ?"
+                , " = ?;"
                 ]
         authExecute pamConnPool q [userLogin]
